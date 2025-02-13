@@ -1,0 +1,19 @@
+var cc "gcc"
+var cxx "g++"
+
+targ build
+    depends [someothertarget anothertarget]
+
+    # access vars in run with {varname}
+    run
+        {cc} main.c -o main
+        echo "build"
+        ./run_a_shell_script.sh
+        echo "done"
+    end
+end
+
+targ mytarget
+    depends [anothertarget]
+    run echo "this is one line" end
+end

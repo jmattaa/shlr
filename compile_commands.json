@@ -1,0 +1,30 @@
+[
+  {
+    "arguments": [
+      "/usr/bin/gcc",
+      "-c",
+      "-g",
+      "-Iinclude",
+      "-o",
+      "bin/obj/lexer/token.o",
+      "src/lexer/token.c"
+    ],
+    "directory": "/Users/jonathan/Dev/shlr",
+    "file": "/Users/jonathan/Dev/shlr/src/lexer/token.c",
+    "output": "/Users/jonathan/Dev/shlr/bin/obj/lexer/token.o"
+  },
+  {
+    "arguments": [
+      "/usr/bin/gcc",
+      "-c",
+      "-g",
+      "-Iinclude",
+      "-o",
+      "bin/obj/main.o",
+      "src/main.c"
+    ],
+    "directory": "/Users/jonathan/Dev/shlr",
+    "file": "/Users/jonathan/Dev/shlr/src/main.c",
+    "output": "/Users/jonathan/Dev/shlr/bin/obj/main.o"
+  }
+]
