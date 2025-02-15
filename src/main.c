@@ -18,6 +18,7 @@ int main(int argc, char **argv)
 
     shAstNode_Print(root, 0);
 
+    shLexer_Free(lexer);
     shParser_Free(parser);
     shAstNode_Free(root);
 
