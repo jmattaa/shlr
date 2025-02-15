@@ -20,7 +20,22 @@ typedef enum
 } shTokenType;
 
 #define SH_KEYWORDS_COUNT 5
+#define SH_KEYWORDS_ITER(_X)                                                   \
+    _X(var)                                                                    \
+    _X(targ)                                                                   \
+    _X(depends)                                                                \
+    _X(run)                                                                    \
+    _X(end)
+
+typedef enum
+{
+#define _X(x) SH_KEYWORD_##x,
+    SH_KEYWORDS_ITER(_X)
+#undef _X
+} shKeywordType;
+
 extern const char *shlr_keywords[SH_KEYWORDS_COUNT];
+extern const char *shlr_token_type_names[SH_TOKEN_TYPES_COUNT];
 
 typedef struct _shToken
 {
@@ -28,6 +43,9 @@ typedef struct _shToken
     char *value;
     int line;
     int column;
+
+    // only if it's a keyword
+    shKeywordType keyword;
 } shToken;
 
 shToken *shToken_Init(shTokenType type, char *value, int line, int column);

@@ -6,13 +6,15 @@
 
 int shlr_utils_inStrArr(char *str, char **arr, int len)
 {
-    int i;
-    for (i = 0; i < len; i++)
-    {
-        if (strcmp(str, arr[i]) == 0)
-            return 1;
-    }
-    return 0;
+    int idx = -1;
+    for (int i = 0; i < SH_KEYWORDS_COUNT; i++)
+        if (strcmp(str, shlr_keywords[i]) == 0)
+        {
+            idx = i;
+            break;
+        }
+
+    return idx;
 }
 
 const char *shlr_utils_readFile(char *path, size_t *len)

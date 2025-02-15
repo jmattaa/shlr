@@ -1,8 +1,9 @@
 #include "lexer/token.h"
 #include <stdlib.h>
 
-const char *shlr_keywords[SH_KEYWORDS_COUNT] = {"var", "targ", "depends", "run",
-                                                "end"};
+#define _X(x) #x,
+const char *shlr_keywords[SH_KEYWORDS_COUNT] = {SH_KEYWORDS_ITER(_X)};
+#undef _X
 
 shToken *shToken_Init(shTokenType type, char *value, int line, int column)
 {
@@ -23,3 +24,8 @@ void shToken_Free(shToken *token)
     free(token->value);
     free(token);
 }
+
+#define _X(x) #x,
+const char *shlr_token_type_names[SH_TOKEN_TYPES_COUNT] = {
+    SH_TOKEN_TYPES_ITER(_X)};
+#undef _X

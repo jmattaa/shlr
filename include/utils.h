@@ -8,7 +8,7 @@
  * @param arr The array to check in
  * @param len The length of the array
  * 
- * @return 1 if the string is in the array, 0 otherwise
+ * @return index of string in array if the string is in the array, -1 otherwise
 */
 #include <stddef.h>
 int shlr_utils_inStrArr(char *str, char **arr, int len);

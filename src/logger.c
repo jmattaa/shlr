@@ -36,11 +36,6 @@ void shlr_logger_fatal(int err, const char *fmt, ...)
     exit(err);
 }
 
-#define _X(x) #x,
-static const char *shlr_token_type_names[SH_TOKEN_TYPES_COUNT] = {
-    SH_TOKEN_TYPES_ITER(_X)};
-#undef _X
-
 void shlr_logger_logToken(shToken *token)
 {
     printf("token: {%s, '%s', line: %d, col: %d}\n",

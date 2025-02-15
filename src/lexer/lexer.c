@@ -14,7 +14,7 @@ static shToken *lex_advancewithcurrent(shLexer *lexer, shTokenType type);
 static shToken *lex_parseid(shLexer *lexer);
 static shToken *lex_parseRunblock(shLexer *lexer);
 static shToken *lex_parsestring(shLexer *lexer);
-static shToken *lex_parsecmt(shLexer *lexer);
+static void lex_parsecmt(shLexer *lexer);
 // ---------------------------------------------------------------------------
 
 shLexer *shLexer_Init(const char *src, size_t src_len)
@@ -63,7 +63,8 @@ shToken *shLexer_Next(shLexer *lexer)
         case ']':
             return lex_advancewithcurrent(lexer, SH_TOKEN_RBRACKET);
         case '#':
-            return lex_parsecmt(lexer);
+            lex_parsecmt(lexer);
+            break;
         default:
             shlr_logger_fatal(1,
                               "Unknown character '%c' at line %d, column %d\n",
@@ -133,8 +134,17 @@ static shToken *lex_parseid(shLexer *lexer)
         lex_advance(lexer);
     }
 
-    if (shlr_utils_inStrArr(value, (char **)shlr_keywords, SH_KEYWORDS_COUNT))
-        return shToken_Init(SH_TOKEN_KEYWORD, value, beginline, begincolumn);
+    int keyword_idx =
+        shlr_utils_inStrArr(value, (char **)shlr_keywords, SH_KEYWORDS_COUNT);
+    if (keyword_idx != -1)
+    {
+        shToken *tok =
+            shToken_Init(SH_TOKEN_KEYWORD, value, beginline, begincolumn);
+
+        tok->keyword = (shKeywordType)keyword_idx;
+
+        return tok;
+    }
     else
         return shToken_Init(SH_TOKEN_IDENTIFIER, value, beginline, begincolumn);
 }
@@ -194,7 +204,8 @@ static shToken *lex_parsestring(shLexer *lexer)
     return shToken_Init(SH_TOKEN_STRING, value, beginline, begincolumn);
 }
 
-static shToken *lex_parsecmt(shLexer *lexer)
+// it will just skip the funciton and all it does is just advance the lexer
+static void lex_parsecmt(shLexer *lexer)
 {
     char *value = malloc(sizeof(char));
 
@@ -213,6 +224,4 @@ static shToken *lex_parsecmt(shLexer *lexer)
     }
 
     lex_advance(lexer); // skip the \n
-
-    return shToken_Init(SH_TOKEN_COMMENT, value, beginline, begincolumn);
 }
