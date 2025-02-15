@@ -1,1 +1,1 @@
-- [ ] why the fuck is a comment printed as SH_TOKEN_EOF
+- [x] why the fuck is a comment printed as SH_TOKEN_EOF, ha i had to just clean compile it
