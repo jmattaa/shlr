@@ -13,7 +13,6 @@ static void lex_skipwhitespace(shLexer *lexer);
 static shToken *lex_advancewithcurrent(shLexer *lexer, shTokenType type);
 static shToken *lex_parseid(shLexer *lexer);
 static shToken *lex_parseRunblock(shLexer *lexer);
-static shToken *lex_parsestring(shLexer *lexer);
 static shToken *lex_parsecmt(shLexer *lexer);
 // ---------------------------------------------------------------------------
 
@@ -42,7 +41,9 @@ shToken *shLexer_Next(shLexer *lexer)
         if (lexer->c == '#' || lexer->line == lexer->last_useful_cmt_line)
             return lex_parsecmt(lexer);
 
-        lex_advance(lexer);
+
+        // everything is basically a runblock
+        return lex_parseRunblock(lexer);
     }
 
     return shToken_Init(SH_TOKEN_EOF, NULL, lexer->line, lexer->column);
@@ -94,13 +95,17 @@ static shToken *lex_advancewithcurrent(shLexer *lexer, shTokenType type)
 
 static shToken *lex_parsecmt(shLexer *lexer)
 {
-    lex_advance(lexer); // skip #
+    if (lexer->c != '#')
+        lex_advance(lexer); // skip #
+
     lex_skipwhitespace(lexer);
 
-    if (isalnum(lexer->c) || lexer->c == '_')
+    shToken *tok = lex_parseid(lexer);
+
+    if (tok->type == SH_TOKEN_KEYWORD)
     {
         lexer->last_useful_cmt_line = lexer->line;
-        return lex_parseid(lexer);
+        return tok;
     }
 
     while (lexer->c != '\n' && lexer->c != '\0')
@@ -138,4 +143,33 @@ static shToken *lex_parseid(shLexer *lexer)
     }
 
     return shToken_Init(SH_TOKEN_IDENTIFIER, value, beginline, begincolumn);
+}
+
+static shToken *lex_parseRunblock(shLexer *lexer)
+{
+    char *value = malloc(sizeof(char));
+
+    int beginline = lexer->line;
+    int begincolumn = lexer->column;
+
+    while (lexer->c != '\0')
+    {
+        if (lexer->c == '#')
+        {
+            shToken *tok = lex_parsecmt(lexer);
+            if (tok->keyword == SH_KEYWORD_endtarg)
+                break;
+        }
+
+        value = realloc(value, sizeof(char) * (strlen(value) + 2));
+        value[strlen(value)] = lexer->c;
+        value[strlen(value) + 1] = '\0';
+
+        lex_advance(lexer);
+    }
+
+    shlr_logger_fatal(1, "missing end of run block at line %d, column %d\n",
+                      beginline, begincolumn);
+
+    return NULL; // unreachable but my lsp dosen't get it
 }
