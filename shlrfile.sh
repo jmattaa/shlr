@@ -16,8 +16,12 @@ echo "pre build"
 # (targ, depends, endtarg)
 
 #targ clean
-#depends targ2 build
 rm main
 echo "clean"
 echo "done"
+#endtarg
+
+#targ doAll
+#depends build clean
+echo "built and then cleaned hihi"
 #endtarg
