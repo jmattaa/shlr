@@ -4,7 +4,6 @@
 typedef enum _shAstType
 {
     SH_AST_ROOT, // will be the whole program
-    SH_AST_VAR,
     SH_AST_TARG,
     SH_AST_DEPEND,
     SH_AST_RUNBLOCK

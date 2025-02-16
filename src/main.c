@@ -1,5 +1,5 @@
 #include "lexer/lexer.h"
-#include "logger.h"
+#include "parser/parser.h"
 #include "utils.h"
 #include <stddef.h>
 #include <stdio.h>
@@ -12,17 +12,15 @@ int main(int argc, char **argv)
     const char *src = shlr_utils_readFile(path, &src_len);
 
     shLexer *lexer = shLexer_Init(src, src_len);
+    shParser *parser = shParser_Init(lexer);
 
-    shToken *token = shToken_Init(-1, NULL, 0, 0);
-    while (token->type != SH_TOKEN_EOF)
-    {
-        shToken_Free(token);
-        token = shLexer_Next(lexer);
-        shlr_logger_logToken(token);
-    }
+    shAstNode *root = shParser_Parse(parser);
 
-    shToken_Free(token);
+    shAstNode_Print(root, 0);
+
     shLexer_Free(lexer);
+    shParser_Free(parser);
+    shAstNode_Free(root);
 
     return 0;
 }

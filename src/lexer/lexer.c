@@ -42,7 +42,8 @@ shToken *shLexer_Next(shLexer *lexer)
             return lex_parsecmt(lexer);
 
         // everything is basically a runblock
-        return lex_parseRunblock(lexer);
+        if (lexer->c != '\0')
+            return lex_parseRunblock(lexer);
     }
 
     return shToken_Init(SH_TOKEN_EOF, NULL, lexer->line, lexer->column);
