@@ -13,11 +13,12 @@ int main(int argc, char **argv)
 
     shLexer *lexer = shLexer_Init(src, src_len);
 
-    shToken *token = shLexer_Next(lexer);
+    shToken *token = shToken_Init(-1, NULL, 0, 0);
     while (token->type != SH_TOKEN_EOF)
     {
-        shlr_logger_logToken(token);
+        shToken_Free(token);
         token = shLexer_Next(lexer);
+        shlr_logger_logToken(token);
     }
 
     shToken_Free(token);

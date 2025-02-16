@@ -1,31 +1,34 @@
-## shlr (A shell wrapper (basically make but idk))
+## shlr (A shell wrapper (basically shell scripts but with comments))
 
 features:
- - Simple and clean syntax
+ - Simple and clean syntax using comments in a sh file
  - Task-based, not file-based
  - Dependencies between targets with `depends`
- - Multiline shell scripting with `run`
 
 ```bash
-var cc "gcc"
-var cxx "g++"
+cc="gcc"
+cxx="g++"
 
-targ build
-    depends [someothertarget anothertarget]
+#targ build
+#depends targ2
+$(cc) src/main.c -o main
+echo "build"
+echo "done"
+#endtarg
 
-    # access vars in run with {varname}
-    run
-        {cc} main.c -o main
-        echo "build"
-        ./run_a_shell_script.sh
-        echo "done"
-    end
-end
+#targ targ2
+echo "pre build"
+#endtarg
 
-targ mytarget
-    depends [anothertarget]
-    run echo "this is one line" end
-end
+# a normal comment just dosent start with a keyword
+# (targ, depends, endtarg)
+
+#targ clean
+#depends targ2 build
+rm main
+echo "clean"
+echo "done"
+#endtarg
 ```
 
 running it should be

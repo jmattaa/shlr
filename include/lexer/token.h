@@ -1,15 +1,14 @@
 #ifndef SHLR_LEXER_TOKEN_H
 #define SHLR_LEXER_TOKEN_H
 
-#define SH_TOKEN_TYPES_COUNT 7
+#define SH_TOKEN_TYPES_COUNT 6
 #define SH_TOKEN_TYPES_ITER(_X)                                                \
     _X(SH_TOKEN_KEYWORD)                                                       \
     _X(SH_TOKEN_IDENTIFIER)                                                    \
-    _X(SH_TOKEN_LBRACKET)                                                      \
-    _X(SH_TOKEN_RBRACKET)                                                      \
     _X(SH_TOKEN_COMMENT)                                                       \
     _X(SH_TOKEN_RUNBLOCK)                                                      \
-    _X(SH_TOKEN_EOF)
+    _X(SH_TOKEN_EOF)                                                           \
+    _X(SH_TOKEN_UNEXPECTED)
 
 typedef enum
 {

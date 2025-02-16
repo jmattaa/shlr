@@ -97,7 +97,7 @@ static shToken *lex_advancewithcurrent(shLexer *lexer, shTokenType type)
 
 static shToken *lex_parsecmt(shLexer *lexer)
 {
-    if (lexer->c != '#')
+    if (lexer->c == '#')
         lex_advance(lexer); // skip #
 
     lex_skipwhitespace(lexer);
@@ -116,16 +116,18 @@ static shToken *lex_parsecmt(shLexer *lexer)
     while (lexer->c != '\n' && lexer->c != '\0')
         lex_advance(lexer);
 
+    shToken_Free(tok);
     return shToken_Init(SH_TOKEN_COMMENT, NULL, lexer->line, lexer->column);
 }
 
 static shToken *lex_parseid(shLexer *lexer)
 {
     char *value = malloc(1);
+    value[0] = '\0';
 
     int beginline = lexer->line;
     int begincolumn = lexer->column;
-    
+
     size_t val_len = 0;
 
     while (isalnum(lexer->c) || lexer->c == '_')
@@ -137,9 +139,6 @@ static shToken *lex_parseid(shLexer *lexer)
         value[val_len] = '\0';
         lex_advance(lexer);
     }
-
-    if (!value)
-        shlr_logger_fatal(1, "empty '#' at line %d", lexer->line);
 
     int keyword_idx =
         shlr_utils_inStrArr(value, (char **)shlr_keywords, SH_KEYWORDS_COUNT);
@@ -170,13 +169,7 @@ static shToken *lex_parseRunblock(shLexer *lexer)
     while (lexer->c != '\0')
     {
         if (lexer->c == '#')
-        {
-            shToken *tok = lex_parsecmt(lexer);
-            if (tok->type == SH_TOKEN_COMMENT)
-                break;
-
-            return tok;
-        }
+            break;
 
         value = realloc(value, length + 2);
 
@@ -187,8 +180,5 @@ static shToken *lex_parseRunblock(shLexer *lexer)
         lex_advance(lexer);
     }
 
-    shlr_logger_fatal(1, "missing end of run block at line %d, column %d\n",
-                      beginline, begincolumn);
-
-    return NULL; // unreachable but lsp dosen't know
+    return shToken_Init(SH_TOKEN_RUNBLOCK, value, beginline, begincolumn);
 }

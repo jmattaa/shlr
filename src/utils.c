@@ -9,7 +9,6 @@ int shlr_utils_inStrArr(char *str, char **arr, int len)
     int idx = -1;
     for (int i = 0; i < len; i++)
     {
-        shlr_logger_log("arr[%d]: %s", i, arr[i]);
         if (strcmp(str, arr[i]) == 0)
         {
             idx = i;
