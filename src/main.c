@@ -1,15 +1,15 @@
+#include "cli.h"
 #include "lexer/lexer.h"
 #include "parser/parser.h"
 #include "shlr.h"
 #include "utils.h"
 #include <stddef.h>
 #include <stdio.h>
+#include <stdlib.h>
 
 int main(int argc, char **argv)
 {
-    char *targ = NULL;
-    if (argc > 1)
-        targ = argv[1];
+    char *targ = shlr_parsecmd(argc, argv);
 
     char *path = "shlrfile.sh";
     size_t src_len;
@@ -22,8 +22,12 @@ int main(int argc, char **argv)
     shAstNode *root = shParser_Parse(parser);
 
     char *script = shlr_createTargScript(root, targ);
-    printf("%s\n", script);
+    if (shlr_dryRun)
+        printf("%s\n", script);
+    else
+        shlr_runScript(script);
 
+    free(script);
     shLexer_Free(lexer);
     shParser_Free(parser);
     shAstNode_Free(root);
