@@ -10,7 +10,7 @@ objects = $(patsubst $(src)/%.c, $(obj)/%.o, $(source))
 INSTALL_DIR = /usr/local/bin
 
 cflags = -g -Iinclude
-lflags = -g -ggdb 
+lflags = -g -ggdb -fsanitize=address
 
 $(exec): $(objects)
 	gcc $(lflags) -o $@ $^

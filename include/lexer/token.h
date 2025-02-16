@@ -18,7 +18,7 @@ typedef enum
 #undef _X
 } shTokenType;
 
-#define SH_KEYWORDS_COUNT 5
+#define SH_KEYWORDS_COUNT 3
 #define SH_KEYWORDS_ITER(_X)                                                   \
     _X(targ)                                                                   \
     _X(depends)                                                                \
