@@ -15,6 +15,8 @@ written in a normal shell script. Instead of creating a file for each target
 when doing normal shell scripts, you can do it all in one file.
 
 ## How does it look like?
+You define a file called `shlrfile.sh` and here you can define your targets
+and write normal shell code.
 ```bash
 # you can define a global 'runblock'
 # all this does is run for every single target
