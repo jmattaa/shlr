@@ -7,14 +7,14 @@
 #include <stdlib.h>
 #include <string.h>
 
-// HELPER FUNCTIONS DEFINITIONS
+//  ----------------- HELPER FUNCTIONS DEFINITIONS ---------------------------
 static void lex_advance(shLexer *lexer);
 static void lex_skipwhitespace(shLexer *lexer);
 static shToken *lex_advancewithcurrent(shLexer *lexer, shTokenType type);
 static shToken *lex_parseid(shLexer *lexer);
 static shToken *lex_parseRunblock(shLexer *lexer);
 static shToken *lex_parsestring(shLexer *lexer);
-static void lex_parsecmt(shLexer *lexer);
+static shToken *lex_parsecmt(shLexer *lexer);
 // ---------------------------------------------------------------------------
 
 shLexer *shLexer_Init(const char *src, size_t src_len)
@@ -39,37 +39,10 @@ shToken *shLexer_Next(shLexer *lexer)
     {
         lex_skipwhitespace(lexer);
 
-        if (isalpha(lexer->c))
-        {
-            shToken *id = lex_parseid(lexer);
+        if (lexer->c == '#' || lexer->line == lexer->last_useful_cmt_line)
+            return lex_parsecmt(lexer);
 
-            if (strncmp(id->value, "run", 3) == 0)
-            {
-                shToken_Free(id); // now we don need id
-                return lex_parseRunblock(lexer);
-            }
-
-            return id;
-        }
-
-        switch (lexer->c)
-        {
-        case '\0':
-            break;
-        case '"':
-            return lex_parsestring(lexer);
-        case '[':
-            return lex_advancewithcurrent(lexer, SH_TOKEN_LBRACKET);
-        case ']':
-            return lex_advancewithcurrent(lexer, SH_TOKEN_RBRACKET);
-        case '#':
-            lex_parsecmt(lexer);
-            break;
-        default:
-            shlr_logger_fatal(1,
-                              "Unknown character '%c' at line %d, column %d\n",
-                              lexer->c, lexer->line, lexer->column);
-        }
+        lex_advance(lexer);
     }
 
     return shToken_Init(SH_TOKEN_EOF, NULL, lexer->line, lexer->column);
@@ -119,6 +92,23 @@ static shToken *lex_advancewithcurrent(shLexer *lexer, shTokenType type)
     return token;
 }
 
+static shToken *lex_parsecmt(shLexer *lexer)
+{
+    lex_advance(lexer); // skip #
+    lex_skipwhitespace(lexer);
+
+    if (isalnum(lexer->c) || lexer->c == '_')
+    {
+        lexer->last_useful_cmt_line = lexer->line;
+        return lex_parseid(lexer);
+    }
+
+    while (lexer->c != '\n' && lexer->c != '\0')
+        lex_advance(lexer);
+
+    return shToken_Init(SH_TOKEN_COMMENT, NULL, lexer->line, lexer->column);
+}
+
 static shToken *lex_parseid(shLexer *lexer)
 {
     char *value = malloc(sizeof(char));
@@ -136,6 +126,7 @@ static shToken *lex_parseid(shLexer *lexer)
 
     int keyword_idx =
         shlr_utils_inStrArr(value, (char **)shlr_keywords, SH_KEYWORDS_COUNT);
+
     if (keyword_idx != -1)
     {
         shToken *tok =
@@ -145,83 +136,6 @@ static shToken *lex_parseid(shLexer *lexer)
 
         return tok;
     }
-    else
-        return shToken_Init(SH_TOKEN_IDENTIFIER, value, beginline, begincolumn);
-}
 
-static shToken *lex_parseRunblock(shLexer *lexer)
-{
-    char *value = malloc(sizeof(char));
-
-    int beginline = lexer->line;
-    int begincolumn = lexer->column;
-
-    while (lexer->c != '\0')
-    {
-        if (strncmp(&lexer->src[lexer->pos], "end", 3) == 0)
-        {
-            lex_advance(lexer); // e
-            lex_advance(lexer); // n
-            lex_advance(lexer); // d
-
-            return shToken_Init(SH_TOKEN_RUNBLOCK, value, beginline,
-                                begincolumn);
-        }
-
-        value = realloc(value, sizeof(char) * (strlen(value) + 2));
-        value[strlen(value)] = lexer->c;
-        value[strlen(value) + 1] = '\0';
-
-        lex_advance(lexer);
-    }
-
-    shlr_logger_fatal(1, "missing end of run block at line %d, column %d\n",
-                      beginline, begincolumn);
-
-    return NULL; // unreachable but my lsp dosen't get it
-}
-
-static shToken *lex_parsestring(shLexer *lexer)
-{
-    char *value = malloc(sizeof(char));
-
-    lex_advance(lexer); // skip the first "
-
-    int beginline = lexer->line;
-    int begincolumn = lexer->column;
-
-    while (lexer->c != '"')
-    {
-        value = realloc(value, sizeof(char) * (strlen(value) + 2));
-        value[strlen(value)] = lexer->c;
-        value[strlen(value) + 1] = '\0';
-
-        lex_advance(lexer);
-    }
-
-    lex_advance(lexer); // skip the last "
-
-    return shToken_Init(SH_TOKEN_STRING, value, beginline, begincolumn);
-}
-
-// it will just skip the funciton and all it does is just advance the lexer
-static void lex_parsecmt(shLexer *lexer)
-{
-    char *value = malloc(sizeof(char));
-
-    lex_advance(lexer); // skip the #
-
-    int beginline = lexer->line;
-    int begincolumn = lexer->column;
-
-    while (lexer->c != '\n')
-    {
-        value = realloc(value, sizeof(char) * (strlen(value) + 2));
-        value[strlen(value)] = lexer->c;
-        value[strlen(value) + 1] = '\0';
-
-        lex_advance(lexer);
-    }
-
-    lex_advance(lexer); // skip the \n
+    return shToken_Init(SH_TOKEN_IDENTIFIER, value, beginline, begincolumn);
 }

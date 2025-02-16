@@ -12,6 +12,8 @@ typedef struct _shLexer
     int line;
     int column;
     int pos;
+
+    int last_useful_cmt_line;
 } shLexer;
 
 shLexer *shLexer_Init(const char *src, size_t src_len);

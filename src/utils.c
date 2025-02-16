@@ -7,8 +7,8 @@
 int shlr_utils_inStrArr(char *str, char **arr, int len)
 {
     int idx = -1;
-    for (int i = 0; i < SH_KEYWORDS_COUNT; i++)
-        if (strcmp(str, shlr_keywords[i]) == 0)
+    for (int i = 0; i < len; i++)
+        if (strcmp(str, arr[i]) == 0)
         {
             idx = i;
             break;

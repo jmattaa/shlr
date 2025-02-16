@@ -80,9 +80,6 @@ static shAstNode *parser_parseKeyword(shParser *parser)
 
     switch (keyword->keyword)
     {
-    case SH_KEYWORD_var:
-        node = parser_parseVar(parser);
-        break;
     case SH_KEYWORD_targ:
         node = parser_parseTarg(parser);
         break;
@@ -90,17 +87,6 @@ static shAstNode *parser_parseKeyword(shParser *parser)
         shlr_logger_fatal(1, "unexpected '%s' at line %d, column %d",
                           keyword->value, keyword->line, keyword->column);
     }
-
-    return node;
-}
-
-static shAstNode *parser_parseVar(shParser *parser)
-{
-    shToken *name = parser_expect(parser, SH_TOKEN_IDENTIFIER);
-    shToken *val =
-        parser_expect(parser, SH_TOKEN_STRING); // all variables are strings
-
-    shAstNode *node = shAstNode_Init(SH_AST_VAR, name->value, val->value);
 
     return node;
 }
@@ -137,8 +123,8 @@ static shAstNode *parser_parseTarg(shParser *parser)
                           run->column);
 
     // the end of target
-    if (parser->current_token->keyword != SH_KEYWORD_end)
-        shlr_logger_fatal(1, "expected 'end' at line %d, column %d",
+    if (parser->current_token->keyword != SH_KEYWORD_endtarg)
+        shlr_logger_fatal(1, "expected 'endtarg' at line %d, column %d",
                           parser->current_token->line,
                           parser->current_token->column);
     parser_next(parser);
