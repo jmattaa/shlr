@@ -25,6 +25,10 @@ cc="gcc"
 bindir="bin"
 srcfile="main.c"
 
+# would you like to make your targets verbose
+# then you could add a 
+# set -x or set -v at the end of the global 'runblock'
+
 # targets are defined by a comment starting with 'targ' followed by a name
 # you can add dependencies with 'depends' followed by a list of targets 
 # (separated by spaces)
