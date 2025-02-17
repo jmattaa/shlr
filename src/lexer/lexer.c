@@ -13,7 +13,8 @@ static void lex_skipwhitespace(shLexer *lexer);
 static shToken *lex_advancewithcurrent(shLexer *lexer, shTokenType type);
 static shToken *lex_parseid(shLexer *lexer);
 static shToken *lex_parseRunblock(shLexer *lexer);
-static shToken *lex_parsecmt(shLexer *lexer);
+static void lex_skipcmt(shLexer *lexer);
+static shToken *lex_peekNext(shLexer *lexer);
 // ---------------------------------------------------------------------------
 
 shLexer *shLexer_Init(const char *src, size_t src_len)
@@ -39,7 +40,25 @@ shToken *shLexer_Next(shLexer *lexer)
         lex_skipwhitespace(lexer);
 
         if (lexer->c == '#' || lexer->line == lexer->last_useful_cmt_line)
-            return lex_parsecmt(lexer);
+        {
+            lex_advance(lexer); // skip #
+            lex_skipwhitespace(lexer);
+            shToken *tok = lex_parseid(lexer);
+
+            if (tok->type == SH_TOKEN_KEYWORD)
+            {
+                lexer->last_useful_cmt_line = lexer->line;
+                return tok;
+            }
+
+            if (lexer->last_useful_cmt_line == lexer->line)
+                return tok;
+
+            // if we here then it is a comment
+            lex_skipcmt(lexer);
+
+            shToken_Free(tok);
+        }
 
         // everything is basically a runblock
         if (lexer->c != '\0')
@@ -96,31 +115,6 @@ static shToken *lex_advancewithcurrent(shLexer *lexer, shTokenType type)
     return token;
 }
 
-static shToken *lex_parsecmt(shLexer *lexer)
-{
-    if (lexer->c == '#')
-        lex_advance(lexer); // skip #
-
-    lex_skipwhitespace(lexer);
-
-    shToken *tok = lex_parseid(lexer);
-
-    if (tok->type == SH_TOKEN_KEYWORD)
-    {
-        lexer->last_useful_cmt_line = lexer->line;
-        return tok;
-    }
-
-    if (lexer->last_useful_cmt_line == lexer->line)
-        return tok;
-
-    while (lexer->c != '\n' && lexer->c != '\0')
-        lex_advance(lexer);
-
-    shToken_Free(tok);
-    return shToken_Init(SH_TOKEN_COMMENT, NULL, lexer->line, lexer->column);
-}
-
 static shToken *lex_parseid(shLexer *lexer)
 {
     char *value = malloc(1);
@@ -170,7 +164,16 @@ static shToken *lex_parseRunblock(shLexer *lexer)
     while (lexer->c != '\0')
     {
         if (lexer->c == '#')
-            break;
+        {
+            shToken *nextTok = lex_peekNext(lexer);
+
+            if (nextTok->type == SH_TOKEN_KEYWORD)
+                break;
+            else
+                lex_skipcmt(lexer);
+
+            shToken_Free(nextTok);
+        }
 
         value = realloc(value, length + 2);
 
@@ -182,4 +185,23 @@ static shToken *lex_parseRunblock(shLexer *lexer)
     }
 
     return shToken_Init(SH_TOKEN_RUNBLOCK, value, beginline, begincolumn);
+}
+
+static void lex_skipcmt(shLexer *lexer)
+{
+    if (lexer->c == '#')
+        lex_advance(lexer); // skip #
+
+    while (lexer->c != '\n' && lexer->c != '\0')
+        lex_advance(lexer);
+}
+
+static shToken *lex_peekNext(shLexer *lexer)
+{
+    shLexer *temp = malloc(sizeof(shLexer));
+    memcpy(temp, lexer, sizeof(shLexer));
+    shToken *tok = shLexer_Next(temp);
+
+    free(temp);
+    return tok;
 }
