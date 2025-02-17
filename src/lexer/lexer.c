@@ -41,7 +41,9 @@ shToken *shLexer_Next(shLexer *lexer)
 
         if (lexer->c == '#' || lexer->line == lexer->last_useful_cmt_line)
         {
-            lex_advance(lexer); // skip #
+            if (lexer->c == '#')
+                lex_advance(lexer); // skip #
+
             lex_skipwhitespace(lexer);
             shToken *tok = lex_parseid(lexer);
 

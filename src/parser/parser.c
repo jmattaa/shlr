@@ -41,9 +41,6 @@ shAstNode *shParser_Parse(shParser *parser)
             case SH_TOKEN_KEYWORD:
                 shAstNode_AddChild(root, parser_parseKeyword(parser));
                 break;
-            case SH_TOKEN_COMMENT:
-                parser_next(parser); // just skip comments
-                break;
             default:
                 shlr_logger_fatal(
                     1, "unexpected '%s' at line %d, column %d",
