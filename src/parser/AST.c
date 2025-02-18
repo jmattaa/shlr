@@ -41,16 +41,41 @@ void shAstNode_Free(shAstNode *node)
     free(node);
 }
 
-void shAstNode_Print(shAstNode *node, int indent)
+void shAstNode_ListTargs(shAstNode *node, shlrCli *cli)
 {
-    if (!node)
-        return;
-
-    for (int i = 0; i < indent; i++)
-        printf("  ");
-    printf("Node Type: %d, Name: %s, Value: %s\n", node->type, node->name,
-           node->value ? node->value : "NULL");
+#define COLOR_RESET "\033[0m"
+#define COLOR_DEPEND "\033[1;32m"
+#define COLOR_DIVIDER "\033[1;33m"
+#define COLOR_NO_DEPEND "\033[1;31m"
 
     for (int i = 0; i < node->children_count; i++)
-        shAstNode_Print(node->children[i], indent + 1);
+    {
+        if (node->children[i]->type == SH_AST_TARG)
+        {
+            if (cli->listdeps)
+                printf(COLOR_DIVIDER "----------\n" COLOR_RESET);
+
+            printf("%s\n", node->children[i]->name);
+
+            if (cli->listdeps)
+            {
+                printf(COLOR_DIVIDER "Depends on:\n" COLOR_RESET);
+                int has_dependencies = 0;
+                for (int j = 0; j < node->children[i]->children_count; j++)
+                {
+                    if (node->children[i]->children[j]->type == SH_AST_DEPEND)
+                    {
+                        printf("  - %s\n",
+                               node->children[i]->children[j]->name);
+                        has_dependencies = 1;
+                    }
+                }
+
+                if (!has_dependencies)
+                    printf(COLOR_NO_DEPEND "  (No dependencies)\n" COLOR_RESET);
+
+                printf("\n");
+            }
+        }
+    }
 }

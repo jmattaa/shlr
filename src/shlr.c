@@ -7,8 +7,6 @@
 #define INITIAL_BUFFER_SIZE 256
 #define MAX_DEP_STACK_SIZE 128
 
-int shlr_dryRun = 0;
-
 // ------------------ HELPER FUNCTION DEFINITIONS ---------------------------
 // append value to script
 static void append_to_script(char **script, size_t *script_length,
@@ -82,11 +80,6 @@ char *shlr_createTargScript(shAstNode *root, char *targ)
         shlr_logger_fatal(1, "target '%s' not found!", targ);
 
     return script;
-}
-
-void shlr_setDryRun()
-{
-    shlr_dryRun = 1;
 }
 
 void shlr_runScript(char *script)

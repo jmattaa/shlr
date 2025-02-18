@@ -1,6 +1,7 @@
 #ifndef SHLR_PARSER_AST_H
 #define SHLR_PARSER_AST_H
 
+#include "cli.h"
 typedef enum _shAstType
 {
     SH_AST_ROOT, // will be the whole program
@@ -24,6 +25,6 @@ shAstNode *shAstNode_Init(shAstType type, char *name, char *value);
 void shAstNode_AddChild(shAstNode *parent, shAstNode *child);
 void shAstNode_Free(shAstNode *node);
 
-void shAstNode_Print(shAstNode *node, int indent);
+void shAstNode_ListTargs(shAstNode *node, shlrCli *cli);
 
 #endif

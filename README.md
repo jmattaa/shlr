@@ -4,6 +4,17 @@
 
 </div>
 
+## Installation
+
+clone this repository locally
+```bash
+git clone https://github.com/jmattaa/shlr
+```
+then build it with `shlr` or `make`
+```bash
+sudo make install
+sudo shlr install
+```
 ## What is this?
 
 This is a wrapper around normal shell scripts, it lets you define targets 
@@ -51,3 +62,14 @@ rm $(bindir)/main
 ```
 Now that you've defined your targets you can run them with `shlr <target>`
 or just want to run the first target do `shlr`
+
+## Flags
+
+Here are the flags that you could use:
+- `--dry-run` or `-d` will only print the commands that would be run without running them
+- `--list-targets` or `-l` will list all the targets that you can run
+- `--list-dependencies` or `-L` like `--list-targets` but it also lists the 
+    dependencies for each target
+- `--version` or `-v` will show the current version
+- `--help` or `-h` will show a help message
+
