@@ -1,6 +1,7 @@
 #include "shlr.h"
 #include "logger.h"
 #include "parser/AST.h"
+#include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 

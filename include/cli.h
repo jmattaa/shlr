@@ -1,7 +1,7 @@
 #ifndef SHLR_CLI_H
 #define SHLR_CLI_H
 
-#define SHLR_CLI_VERSION "0.2.0"
+#define SHLR_CLI_VERSION "0.2.1"
 
 typedef struct _shlrCli
 {

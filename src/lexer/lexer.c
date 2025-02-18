@@ -165,7 +165,7 @@ static shToken *lex_parseRunblock(shLexer *lexer)
 
     while (lexer->c != '\0')
     {
-        if (lexer->c == '#')
+        if (lexer->c == '#' && lexer->src[lexer->pos - 1] == '\n')
         {
             shToken *nextTok = lex_peekNext(lexer);
 

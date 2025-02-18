@@ -1,3 +1,9 @@
+# print the commands being run cuz that be kinda nice yk
+info() {
+    echo "$*"
+    "$@"
+}
+
 cc="gcc"
 
 build="bin"
@@ -7,7 +13,9 @@ obj="$build/obj"
 exec="$build/shlr"
 
 sources=$(find "$src" -name "*.c")
-objects=$(echo "$sources" | sed "s|^$src/|$obj/|; s|\.c$|\.o|")
+for source in $sources; do
+    objects="$objects "$obj/$(basename ${source%.c}.o)""
+done
 
 cflags="-g -Iinclude"
 lflags="-g -ggdb -fsanitize=address"
@@ -15,12 +23,6 @@ lflags="-g -ggdb -fsanitize=address"
 cflags_release="-O2 -Iinclude"
 
 INSTALL_DIR="/usr/local/bin"
-
-# this set -x will make every target verbose, if it were in the begining of
-# the file it would print the whole file, now it only prints the command
-# run by the target
-PS4='' # lessen the noise
-set -x
 
 #targ builddev
 #depends buildObjs
@@ -30,32 +32,30 @@ $cc $lflags -o $exec $objects
 #targ buildObjs
 #depends mkdirs
 for source in $sources; do
-  object=$(echo "$source" | sed "s|^$src/|$obj/|; s|\.c$|\.o|")
-  $cc $cflags -c "$source" -o "$object"
+    info $cc -c $cflags -o $obj/$(basename ${source%.c}.o) $source
 done
 #endtarg
 
 #targ mkdirs
-mkdir -p $build
-mkdir -p $obj
-echo "$sources" | sed "s|^$src|$obj|; s|/[^/]*$||" | sort -u | xargs -I {} mkdir -p {}
+info mkdir -p $build
+info mkdir -p $obj
 #endtarg
 
 #targ buildRelease
 #depends clean
-mkdir -p $build
-$cc $cflags_release -o $exec $sources
+info mkdir -p $build
+info $cc $cflags_release -o $exec $sources
 #endtarg
 
 #targ install
 #depends buildRelease
-install -m 755 $exec $INSTALL_DIR
+info install -m 755 $exec $INSTALL_DIR
 #endtarg
 
 #targ uninstall
-rm -f $INSTALL_DIR/shlr
+info rm -f $INSTALL_DIR/shlr
 #endtarg
 
 #targ clean
-rm -rf $build
+info rm -rf $build
 #endtarg
